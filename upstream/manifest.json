@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "openpanel": {
+    "repository": "https://github.com/Openpanel-dev/openpanel",
+    "commit": "3060ca10213693cf0385be2713c8743d16733a2b",
+    "checkedAt": "2026-09-07",
+    "license": "AGPL-3.0",
+    "derivedArtifacts": {
+      "upstream/openpanel-extra-referrers.json": "packages/common/scripts/get-referrers.ts",
+      "src/user-agent.ts": "packages/common/server/parser-user-agent.ts"
+    },
+    "monitoredPaths": [
+      "packages/common/package.json",
+      "packages/common/server/parser-user-agent.ts",
+      "packages/common/server/parser-user-agent.test.ts",
+      "packages/common/server/parse-referrer.ts",
+      "packages/common/server/parse-referrer.test.ts",
+      "packages/common/scripts/get-referrers.ts",
+      "packages/common/src/url.ts",
+      "apps/worker/src/jobs/events.incoming-event.ts",
+      "packages/db/src/buffers/session-buffer.ts"
+    ]
+  },
+  "uaParser": {
+    "package": "ua-parser-js",
+    "version": "2.0.10",
+    "repository": "https://github.com/faisalman/ua-parser-js",
+    "license": "AGPL-3.0-or-later"
+  },
+  "referrers": {
+    "schema": "5.3",
+    "activeUrl": "https://s3-eu-west-1.amazonaws.com/snowplow-hosted-assets/third-party/referer-parser/referers-5.3.json",
+    "sourceUrl": "https://s3-eu-west-1.amazonaws.com/snowplow-hosted-assets/third-party/referer-parser/referers-20260827.json",
+    "snapshotDate": "2026-08-27",
+    "retrievedAt": "2026-09-07",
+    "sha256": "889d0235bd5514a3d987962cc3d1c734a7fa9ff570f48e28c8b3e10c72588d68",
+    "license": "GPL-3.0",
+    "normalizations": {
+      "chatbot": "ai"
+    }
+  }
+}

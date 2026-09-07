@@ -1,0 +1,40 @@
+name: Upstream check
+
+on:
+  schedule:
+    - cron: "17 3 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          run_install: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Check recorded upstreams
+        id: upstream
+        run: |
+          set +e
+          pnpm upstream:check > upstream-report.txt 2>&1
+          status=$?
+          cat upstream-report.txt
+          echo "status=$status" >> "$GITHUB_OUTPUT"
+      - name: Open a review issue when needed
+        if: steps.upstream.outputs.status != '0'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [ "$(gh issue list --state open --search 'Upstream update review in:title' --json number --jq length)" = "0" ]; then
+            gh issue create --title "Upstream update review" --body-file upstream-report.txt
+          fi
