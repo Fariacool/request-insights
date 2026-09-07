@@ -56,6 +56,7 @@ Example result:
   "referrer": {
     "name": "ChatGPT",
     "url": "https://chatgpt.com/c/example",
+    "hostname": "chatgpt.com",
     "type": "ai"
   },
   "utm": {
@@ -76,6 +77,7 @@ behavior, while the raw external referrer URL is still retained.
 
 - Missing or non-browser User-Agents are reported as `isServer: true` and device type `server`.
 - Same-host referrers are ignored.
+- Referrer hostnames retain their complete parsed subdomain, such as `www.baidu.com`.
 - Unknown external referrers keep their original URL as `name` and `url` without inventing a type.
 - Repeated query parameters use their final value, matching OpenPanel.
 - Parsing is synchronous and performs no I/O.

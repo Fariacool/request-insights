@@ -7,6 +7,7 @@ const EMPTY_REFERRER: ReferrerInsights = {
   name: null,
   type: null,
   url: null,
+  hostname: null,
 };
 
 function getUrl(value?: string | null): URL | null {
@@ -57,6 +58,7 @@ export function parseReferrer(
       name: campaignMatch?.name ?? normalizedSource,
       type: campaignMatch?.type ?? null,
       url: rawUrl,
+      hostname,
     };
   }
 
@@ -66,5 +68,6 @@ export function parseReferrer(
     name: headerMatch?.name ?? rawUrl,
     type: headerMatch?.type ?? null,
     url: rawUrl,
+    hostname,
   };
 }

@@ -1,6 +1,6 @@
 {
   "name": "request-insights",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Deterministic user-agent, referrer, and UTM insights for server-side JavaScript.",
   "keywords": [
     "analytics",

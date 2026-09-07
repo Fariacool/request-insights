@@ -19,6 +19,8 @@ export interface OsInsights {
 export interface ReferrerInsights {
   name: NullableString;
   url: NullableString;
+  /** Hostname exactly as parsed from the referrer URL, including subdomains such as `www`. */
+  hostname: NullableString;
   /** Canonical traffic category. Snowplow's `chatbot` category is normalized to `ai`. */
   type: NullableString;
 }

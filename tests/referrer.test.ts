@@ -9,6 +9,7 @@ describe('parseReferrer', () => {
       name: 'Google',
       type: 'search',
       url: 'https://www.google.com',
+      hostname: 'www.google.com',
     });
   });
 
@@ -21,6 +22,7 @@ describe('parseReferrer', () => {
       name: 'ChatGPT',
       type: 'ai',
       url: 'https://chatgpt.com',
+      hostname: 'chatgpt.com',
     });
   });
 
@@ -29,11 +31,13 @@ describe('parseReferrer', () => {
       name: 'https://unknown.example/path',
       type: null,
       url: 'https://unknown.example/path',
+      hostname: 'unknown.example',
     });
     expect(parseReferrer('not-a-url', 'example.com', {})).toEqual({
       name: 'not-a-url',
       type: null,
       url: 'not-a-url',
+      hostname: null,
     });
   });
 
@@ -42,6 +46,7 @@ describe('parseReferrer', () => {
       name: null,
       type: null,
       url: null,
+      hostname: null,
     });
   });
 
@@ -63,11 +68,25 @@ describe('parseReferrer', () => {
         name: 'ChatGPT',
         type: 'ai',
         url: null,
+        hostname: null,
       },
     );
   });
 
   it.each([undefined, null, ''])('returns empty attribution for %s', (value) => {
-    expect(parseReferrer(value, 'example.com', {})).toEqual({ name: null, type: null, url: null });
+    expect(parseReferrer(value, 'example.com', {})).toEqual({
+      name: null,
+      type: null,
+      url: null,
+      hostname: null,
+    });
+  });
+
+  it.each([
+    ['https://www.baidu.com/', 'www.baidu.com'],
+    ['https://google.com', 'google.com'],
+    ['https://news.example.co.uk/article', 'news.example.co.uk'],
+  ])('preserves the complete hostname from %s', (url, hostname) => {
+    expect(parseReferrer(url, 'product.example', {}).hostname).toBe(hostname);
   });
 });

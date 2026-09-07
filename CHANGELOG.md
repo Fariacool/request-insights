@@ -5,6 +5,12 @@ Changelog, and this project follows Semantic Versioning.
 
 ## Unreleased
 
+## 0.2.0 - 2026-09-07
+
+### Added
+
+- Added `referrer.hostname`, preserving the parsed hostname including `www` and other subdomains.
+
 ## 0.1.0 - 2026-09-07
 
 ### Added

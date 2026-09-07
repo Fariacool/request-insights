@@ -17,7 +17,12 @@ describe('parseRequestInsights', () => {
       device: { type: 'mobile', brand: 'Apple', model: 'iPhone' },
       browser: { name: 'Mobile Safari', version: '17.0' },
       os: { name: 'iOS', version: '17.0' },
-      referrer: { name: 'ChatGPT', type: 'ai', url: 'https://chatgpt.com/c/123' },
+      referrer: {
+        name: 'ChatGPT',
+        type: 'ai',
+        url: 'https://chatgpt.com/c/123',
+        hostname: 'chatgpt.com',
+      },
       utm: {
         source: 'ChatGPT',
         medium: 'referral',
@@ -34,7 +39,7 @@ describe('parseRequestInsights', () => {
       device: { type: 'server', brand: null, model: null },
       browser: { name: null, version: null },
       os: { name: null, version: null },
-      referrer: { name: null, type: null, url: null },
+      referrer: { name: null, type: null, url: null, hostname: null },
       utm: { source: null, medium: null, campaign: null, term: null, content: null },
     });
   });
