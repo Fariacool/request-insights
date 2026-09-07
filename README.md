@@ -1,5 +1,7 @@
 # request-insights
 
+[View the package on npm](https://www.npmjs.com/package/request-insights)
+
 Deterministic, null-safe request metadata parsing for server-side JavaScript. It turns a User-Agent,
 request URL, and Referer header into device, browser, operating system, referrer, and UTM insights.
 
