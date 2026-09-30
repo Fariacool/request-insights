@@ -4,7 +4,7 @@ import path from 'node:path';
 import process from 'node:process';
 
 interface Manifest {
-  openpanel: { commit: string; monitoredPaths: string[] };
+  openpanel: { commit: string; reviewedCommit?: string; monitoredPaths: string[] };
   uaParser: { package: string; version: string };
   referrers: { activeUrl: string; sha256: string; snapshotDate: string };
 }
@@ -60,8 +60,10 @@ if (referrerHash !== manifest.referrers.sha256) {
   );
 }
 
+// Reviewed changes may need no port; keep the derived-code provenance independent.
+const openpanelBaseline = manifest.openpanel.reviewedCommit ?? manifest.openpanel.commit;
 const comparison = await getJson<GitHubCompare>(
-  `https://api.github.com/repos/Openpanel-dev/openpanel/compare/${manifest.openpanel.commit}...main`,
+  `https://api.github.com/repos/Openpanel-dev/openpanel/compare/${openpanelBaseline}...main`,
 );
 const relevantFiles = (comparison.files ?? []).filter((file) =>
   manifest.openpanel.monitoredPaths.includes(file.filename),

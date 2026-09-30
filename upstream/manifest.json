@@ -4,6 +4,8 @@
     "repository": "https://github.com/Openpanel-dev/openpanel",
     "commit": "3060ca10213693cf0385be2713c8743d16733a2b",
     "checkedAt": "2026-09-07",
+    "reviewedCommit": "7c4d22ae4b6b20fb08eb5c94a0cd3cfebb3d32ca",
+    "reviewedAt": "2026-10-01",
     "license": "AGPL-3.0",
     "derivedArtifacts": {
       "upstream/openpanel-extra-referrers.json": "packages/common/scripts/get-referrers.ts",

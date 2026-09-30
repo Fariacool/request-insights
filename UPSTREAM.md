@@ -14,6 +14,32 @@ inputs affect released behavior.
 The Snowplow source is an immutable date-stamped snapshot. Its original `chatbot` category is
 normalized to `ai`, after which OpenPanel's extra-referrer map is applied as the final override.
 
+## OpenPanel review baseline
+
+`openpanel.commit` and `checkedAt` record the source of the derived behavior and remain the values
+exposed by `upstreamVersions`. `reviewedCommit` and `reviewedAt` record the latest completed upstream
+review. The checker compares upstream `main` against `reviewedCommit`, falling back to `commit` when
+no separate review baseline is recorded. A review with no behavior change does not require a release.
+
+### 2026-10-01: issue #7, no port required
+
+- Reviewed commit: `7c4d22ae4b6b20fb08eb5c94a0cd3cfebb3d32ca` (2026-09-28).
+- Previous baseline: `3060ca10213693cf0385be2713c8743d16733a2b`.
+- [Immutable comparison](https://github.com/Openpanel-dev/openpanel/compare/3060ca10213693cf0385be2713c8743d16733a2b...7c4d22ae4b6b20fb08eb5c94a0cd3cfebb3d32ca),
+  reviewed for [issue #7](https://github.com/Fariacool/request-insights/issues/7).
+- The only monitored change adds the `./server/share-access` export to
+  `packages/common/package.json`. This package does not use that module. UA, referrer, URL/UTM,
+  event attribution, and session buffer files are unchanged.
+- The OpenPanel `LICENSE.md` blob is unchanged (`0ad25db4bd1d86c452db3f9602ccdbe172438f52`);
+  attribution and notices remain applicable.
+- No referrer domain additions, removals, renames, or reclassifications; no UA detection, UTM
+  precedence, malformed-input, null-shape, public schema, or dependency changes. Runtime output and
+  type declarations remain unchanged. Embedded review metadata adds 92 bytes to each ESM/CommonJS
+  JavaScript bundle. No parser version bump or Changeset is required.
+
+The security-related titles in the issue are a summary of recent upstream commits, not findings
+against this package's derived behavior or dependencies.
+
 ## Compatibility policy
 
 OpenPanel is a behavioral reference, not a runtime dependency. Relevant upstream behavior is

@@ -18,6 +18,13 @@ Compare the recorded commit with upstream `main`, limited initially to `monitore
 manifest. Inspect callers when any monitored symbol changed. Classify each change as UA behavior,
 referrer behavior/data, URL/UTM behavior, tests only, dependency/security, or unrelated.
 
+Use `openpanel.reviewedCommit` as the review baseline when present, otherwise `openpanel.commit`.
+After completing a review, record the immutable reviewed SHA and review date in `reviewedCommit`
+and `reviewedAt`. For changes requiring no port, preserve `commit`, `checkedAt`, derived-code
+attribution, and public `upstreamVersions`; record the decision and immutable comparison in
+`UPSTREAM.md`. A review-only update needs no Changeset or release. When porting behavior, update
+the source provenance and the review baseline together.
+
 Do not replace local public types or adapters wholesale. Port the smallest behavior change and add
 its upstream test or an equivalent regression test. Preserve attribution comments. A license change,
 file disappearance, or unexpected generated-data source is a mandatory human-review stop.
