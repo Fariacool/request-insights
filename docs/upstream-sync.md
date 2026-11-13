@@ -14,9 +14,13 @@ or silently accept changed classifications.
 
 ### OpenPanel
 
-Compare the recorded commit with upstream `main`, limited initially to `monitoredPaths` from the
-manifest. Inspect callers when any monitored symbol changed. Classify each change as UA behavior,
-referrer behavior/data, URL/UTM behavior, tests only, dependency/security, or unrelated.
+Keep a reusable mirror at `tmp/openpanel` (git-ignored). Refresh it with `git fetch origin --prune`
+and compare the recorded commit with `origin/main` locally, limited initially to `monitoredPaths`
+from the manifest. `pnpm upstream:check` does this automatically, creating the mirror on first run;
+set `OPENPANEL_REPO` to use a different path. Avoid the GitHub compare API: unauthenticated requests
+are rate-limited and its file list is capped. Inspect callers when any monitored symbol changed.
+Classify each change as UA behavior, referrer behavior/data, URL/UTM behavior, tests only,
+dependency/security, or unrelated.
 
 Use `openpanel.reviewedCommit` as the review baseline when present, otherwise `openpanel.commit`.
 After completing a review, record the immutable reviewed SHA and review date in `reviewedCommit`

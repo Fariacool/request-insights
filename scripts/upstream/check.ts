@@ -1,18 +1,18 @@
+import { execFile } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { readFile } from 'node:fs/promises';
+import { mkdir, readFile } from 'node:fs/promises';
 import path from 'node:path';
 import process from 'node:process';
 
 interface Manifest {
-  openpanel: { commit: string; reviewedCommit?: string; monitoredPaths: string[] };
+  openpanel: {
+    repository: string;
+    commit: string;
+    reviewedCommit?: string;
+    monitoredPaths: string[];
+  };
   uaParser: { package: string; version: string };
   referrers: { activeUrl: string; sha256: string; snapshotDate: string };
-}
-
-interface GitHubCompare {
-  status?: string;
-  files?: Array<{ filename: string; status: string }>;
-  commits?: Array<{ sha: string; commit: { message: string } }>;
 }
 
 const root = path.resolve(import.meta.dirname, '../..');
@@ -22,16 +22,84 @@ const manifest = JSON.parse(
 const packageJson = JSON.parse(await readFile(path.join(root, 'package.json'), 'utf8')) as {
   dependencies?: Record<string, string>;
 };
-const headers = {
-  'user-agent': 'request-insights-updater/1.0',
-  accept: 'application/vnd.github+json',
-};
+const headers = { 'user-agent': 'request-insights-updater/1.0' };
 const findings: string[] = [];
+
+// Reusable clone; reviews must not depend on the rate-limited GitHub compare API.
+const openpanelRepo = process.env.OPENPANEL_REPO ?? path.join(root, 'tmp/openpanel');
+const GIT_STATUS: Readonly<Record<string, string>> = {
+  A: 'added',
+  C: 'copied',
+  D: 'removed',
+  M: 'modified',
+  R: 'renamed',
+  T: 'modified',
+};
 
 async function getJson<T>(url: string): Promise<T> {
   const response = await fetch(url, { headers });
   if (!response.ok) throw new Error(`Unable to fetch ${url}: HTTP ${response.status}`);
   return response.json() as Promise<T>;
+}
+
+function git(args: string[], cwd = openpanelRepo): Promise<string> {
+  return new Promise((resolve, reject) => {
+    execFile('git', args, { cwd, maxBuffer: 16 * 1024 * 1024 }, (error, stdout) => {
+      if (error) reject(error);
+      else resolve(stdout.trim());
+    });
+  });
+}
+
+async function refreshOpenpanelMirror(): Promise<void> {
+  try {
+    await git(['rev-parse', '--git-dir']);
+  } catch {
+    await mkdir(path.dirname(openpanelRepo), { recursive: true });
+    await git(['clone', '--filter=blob:none', manifest.openpanel.repository, openpanelRepo], root);
+  }
+  await git(['fetch', '--prune', 'origin', 'main']);
+}
+
+async function checkOpenpanel(): Promise<void> {
+  await refreshOpenpanelMirror();
+  const baseline = manifest.openpanel.reviewedCommit ?? manifest.openpanel.commit;
+  try {
+    await git(['cat-file', '-e', `${baseline}^{commit}`]);
+  } catch {
+    await git(['fetch', 'origin', baseline]);
+  }
+
+  const changed = await git([
+    'diff',
+    '--name-status',
+    baseline,
+    'origin/main',
+    '--',
+    ...manifest.openpanel.monitoredPaths,
+  ]);
+  const relevantFiles = changed
+    .split('\n')
+    .filter(Boolean)
+    .map((line) => {
+      const [status = '', ...paths] = line.split('\t');
+      return {
+        filename: paths.at(-1) ?? '',
+        status: GIT_STATUS[status[0] ?? ''] ?? 'changed',
+      };
+    });
+  if (relevantFiles.length === 0) return;
+
+  const recentCommits = await git([
+    'log',
+    '--format=%h %s',
+    '--max-count=10',
+    `${baseline}..origin/main`,
+  ]);
+  const commitSummary = recentCommits.split('\n').filter(Boolean).reverse().join('; ');
+  findings.push(
+    `OpenPanel changed ${relevantFiles.map((file) => `${file.filename} (${file.status})`).join(', ')}. Recent commits: ${commitSummary}`,
+  );
 }
 
 if (packageJson.dependencies?.[manifest.uaParser.package] !== manifest.uaParser.version) {
@@ -60,23 +128,7 @@ if (referrerHash !== manifest.referrers.sha256) {
   );
 }
 
-// Reviewed changes may need no port; keep the derived-code provenance independent.
-const openpanelBaseline = manifest.openpanel.reviewedCommit ?? manifest.openpanel.commit;
-const comparison = await getJson<GitHubCompare>(
-  `https://api.github.com/repos/Openpanel-dev/openpanel/compare/${openpanelBaseline}...main`,
-);
-const relevantFiles = (comparison.files ?? []).filter((file) =>
-  manifest.openpanel.monitoredPaths.includes(file.filename),
-);
-if (relevantFiles.length > 0) {
-  const commitSummary = (comparison.commits ?? [])
-    .slice(-10)
-    .map((commit) => `${commit.sha.slice(0, 8)} ${commit.commit.message.split('\n')[0]}`)
-    .join('; ');
-  findings.push(
-    `OpenPanel changed ${relevantFiles.map((file) => `${file.filename} (${file.status})`).join(', ')}. Recent commits: ${commitSummary}`,
-  );
-}
+await checkOpenpanel();
 
 if (findings.length === 0) {
   console.log('All recorded upstreams are current.');

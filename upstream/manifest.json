@@ -4,23 +4,24 @@
     "repository": "https://github.com/Openpanel-dev/openpanel",
     "commit": "3060ca10213693cf0385be2713c8743d16733a2b",
     "checkedAt": "2026-09-07",
-    "reviewedCommit": "7c4d22ae4b6b20fb08eb5c94a0cd3cfebb3d32ca",
-    "reviewedAt": "2026-10-01",
+    "reviewedCommit": "a5a6eb7d62c9579620ec5e3fbfd4ce760f3d8073",
+    "reviewedAt": "2026-11-14",
     "license": "AGPL-3.0",
     "derivedArtifacts": {
       "upstream/openpanel-extra-referrers.json": "packages/common/scripts/get-referrers.ts",
       "src/user-agent.ts": "packages/common/server/parser-user-agent.ts"
     },
     "monitoredPaths": [
-      "packages/common/package.json",
-      "packages/common/server/parser-user-agent.ts",
-      "packages/common/server/parser-user-agent.test.ts",
-      "packages/common/server/parse-referrer.ts",
-      "packages/common/server/parse-referrer.test.ts",
-      "packages/common/scripts/get-referrers.ts",
-      "packages/common/src/url.ts",
-      "apps/worker/src/jobs/events.incoming-event.ts",
-      "packages/db/src/buffers/session-buffer.ts"
+      "packages/shared/package.json",
+      "packages/shared/src/server/parser-user-agent.ts",
+      "packages/core/src/shared/parser-user-agent.test.ts",
+      "packages/core/src/shared/parse-referrer.ts",
+      "packages/core/src/shared/parse-referrer.test.ts",
+      "packages/core/scripts/get-referrers.ts",
+      "packages/shared/src/url.ts",
+      "packages/core/src/modules/ingest/src/incoming-event-handler.ts",
+      "packages/core/src/modules/ingest/src/incoming-event-handler.test.ts",
+      "packages/core/src/buffers/session-buffer.ts"
     ]
   },
   "uaParser": {

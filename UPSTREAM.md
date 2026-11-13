@@ -40,6 +40,47 @@ no separate review baseline is recorded. A review with no behavior change does n
 The security-related titles in the issue are a summary of recent upstream commits, not findings
 against this package's derived behavior or dependencies.
 
+### 2026-11-14: repository restructure, no port required
+
+- Reviewed commit: `a5a6eb7d62c9579620ec5e3fbfd4ce760f3d8073` (2026-11-06), 493 commits after the
+  previous baseline.
+- Previous baseline: `7c4d22ae4b6b20fb08eb5c94a0cd3cfebb3d32ca` (2026-09-28).
+- [Immutable comparison](https://github.com/Openpanel-dev/openpanel/compare/7c4d22ae4b6b20fb08eb5c94a0cd3cfebb3d32ca...a5a6eb7d62c9579620ec5e3fbfd4ce760f3d8073).
+- Upstream deleted `packages/common` and `apps/worker/src/jobs` and moved every monitored file:
+
+  | Previous path | Current path |
+  | --- | --- |
+  | `packages/common/server/parser-user-agent.ts` | `packages/shared/src/server/parser-user-agent.ts` |
+  | `packages/common/server/parser-user-agent.test.ts` | `packages/core/src/shared/parser-user-agent.test.ts` |
+  | `packages/common/server/parse-referrer.ts` | `packages/core/src/shared/parse-referrer.ts` |
+  | `packages/common/server/parse-referrer.test.ts` | `packages/core/src/shared/parse-referrer.test.ts` |
+  | `packages/common/scripts/get-referrers.ts` | `packages/core/scripts/get-referrers.ts` |
+  | `packages/common/src/url.ts` | `packages/shared/src/url.ts` |
+  | `packages/db/src/buffers/session-buffer.ts` | `packages/core/src/buffers/session-buffer.ts` |
+  | `apps/worker/src/jobs/events.incoming-event.ts` | `packages/core/src/modules/ingest/src/incoming-event-handler.ts` |
+  | `packages/common/package.json` | `packages/shared/package.json` |
+
+- Comparing each moved file with its previous path shows no UA, referrer, or URL/UTM behavior change.
+  The diffs are formatting and comment removal, equivalent condition rewrites (for example
+  `!a && !b` → `!(a || b)`), an explicit return type, and a test-runner switch from `vitest` to
+  `bun:test`. `ua-parser-js` stays pinned to `2.0.6` upstream; this package remains on the current
+  release, `2.0.10`.
+- `parse-referrer.ts` keeps the same `utm_source` → `ref` → `utm_referrer` precedence, the
+  `referrers[source]` → `referrers[source.com]` → name lookup fallback, and the same malformed-input
+  handling. The ingestion composition still resolves
+  `referrerName = utmReferrer?.name || referrer?.name || referrer?.url` and
+  `referrerType = utmReferrer?.type || referrer?.type || ''` behind the same same-domain guard.
+- `packages/core/src/shared/referrers/index.ts` and the 95-entry extra-referrer map are byte-identical
+  to the previous paths, so the bundled referrer data and `upstream/openpanel-extra-referrers.json`
+  are unchanged. The OpenPanel `LICENSE.md` blob is unchanged
+  (`0ad25db4bd1d86c452db3f9602ccdbe172438f52`).
+- New upstream behavior is session/storage modeling this stateless package does not implement:
+  session-buffer batching, a 100-group cap, profile-pointer TTLs, session UTM inheritance, and
+  merging a client-supplied `__query` under the URL query. Request-level output is unaffected.
+- `monitoredPaths` now tracks the current locations so future changes stay visible. `commit`,
+  `checkedAt`, and public `upstreamVersions` are unchanged, and `derivedArtifacts` stays pinned to
+  the paths at `commit` (`3060ca1`); no parser version bump or Changeset is required.
+
 ## Compatibility policy
 
 OpenPanel is a behavioral reference, not a runtime dependency. Relevant upstream behavior is
@@ -54,7 +95,7 @@ than copied blindly.
 ## Update commands
 
 ```sh
-# Read-only network check. Exits non-zero when review is required.
+# Read-only network check. Refreshes tmp/openpanel and exits non-zero when review is required.
 pnpm upstream:check
 
 # Rebuild from the already recorded immutable snapshot.
